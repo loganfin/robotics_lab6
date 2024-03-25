@@ -1,4 +1,5 @@
 import sys
+from time import sleep
 
 # ROS packages
 import rclpy
@@ -18,19 +19,19 @@ namespace = "bunsen"
 
 p = [
     # Rest position
-    [522.718262, 5.908576, 96.417938, 179.9, 0, 30],
+    [522.7, 5.9, 96.4, 179.9, 0.0, 30.0],
     # Die table position
-    [528.298, 3.742, -196.421, -179.9, 0, 30],
+    [528.298, 3.742, -196.421, -179.9, 0.0, 30.0],
     # Start of conveyor (above)
-    [895.488892, -596.086243, -39.261475, 179.9, 0, 30],
+    [895.488892, -596.086243, -39.261475, 179.9, 0.0, 30.0],
     # Start of conveyor (contact with belt)
-    [888.968872, -593.533020, -205.173096, -179.9, 0, 30],
+    [888.968872, -593.533020, -205.173096, -179.9, 0.0, 30.0],
     # End of conveyor (above)
-    [77.675018, -575.866882, -27.547470, 179.9, 0, 30],
+    [77.675018, -575.866882, -27.547470, 179.9, 0.0, 30.0],
     # End of conveyor (contact with belt)
-    [70, -574.967712, -203.650116, -179.9, 0, 30],
+    [70.0, -574.967712, -203.650116, -179.9, 0.0, 30.0],
     # Die table position + 90 degree roll rotation
-    [528.298, 3.742, -196.421, -179.9, 0, 120],
+    [528.298, 3.742, -196.421, -179.9, 0.0, 120.0],
 ]
 
 
@@ -43,29 +44,65 @@ class Demo(Node):
             self, CartPose, f"/{namespace}/cartesian_pose"
         )
 
-        self.gripper_action = ActionClient(
-            self, SchunkGripper, f"/{namespace}/schunk_gripper"
-        )
+        # self.gripper_action = ActionClient(
+        #     self, SchunkGripper, f"/{namespace}/schunk_gripper"
+        # )
 
-    def send_cart_action(self, goal, coord):
-        self.cart_ac.x = coord[0]
-        self.cart_ac.y = coord[1]
-        self.cart_ac.z = coord[2]
-        self.cart_ac.w = coord[3]
-        self.cart_ac.p = coord[4]
-        self.cart_ac.r = coord[5]
-        self.cart_ac.send_goal(goal)
+    def send_cart_action(self, coord):
+        # Do we need a new goal per action?
+        goal = CartPose.Goal()  # Make Goal
+
+        goal.x = coord[0]
+        goal.y = coord[1]
+        goal.z = coord[2]
+        goal.w = coord[3]
+        goal.p = coord[4]
+        goal.r = coord[5]
+
+        result = self.cart_ac.send_goal(goal).result
+        self.get_logger().info(f"Result {result}")
 
     def demo(self):
         self.cart_ac.wait_for_server()  # Wait till it's ready
 
-        # Do we need a new goal per action?
-        cart_goal = CartPose.Goal()  # Make Goal
+        # self.get_logger().info("p[0]")
+        # self.send_cart_action(p[0])
 
-        self.send_cart_action(cart_goal, p[0])
+        # self.get_logger().info("p[1]")
+        # self.send_cart_action(p[1])
+
+        # self.get_logger().info("p[2]")
+        # self.send_cart_action(p[2])
+
+        # self.get_logger().info("p[3]")
+        # self.send_cart_action(p[3])
+
+        # self.get_logger().info("p[2]")
+        # self.send_cart_action(p[2])
+
+        # self.get_logger().info("p[4]")
+        # self.send_cart_action(p[4])
+
+        # self.get_logger().info("p[5]")
+        # self.send_cart_action(p[5])
+
+        # self.get_logger().info("p[4]")
+        # self.send_cart_action(p[4])
+
+        while True:
+            self.get_logger().info("p[0]")
+            self.send_cart_action(p[0])
+
+            self.get_logger().info("p[6]")
+            self.send_cart_action(p[6])
+
+        # self.get_logger().info("p[0]")
+        # self.send_cart_action(p[0])
+
+        # self.cart_ac.wait_for_server()  # Wait till it's ready
 
         # Do we need to wait_for_server() after every action?
-        self.send_cart_action(cart_goal, p[1])
+        # self.send_cart_action(cart_goal, p[1])
 
 
 if __name__ == "__main__":
@@ -83,3 +120,5 @@ if __name__ == "__main__":
 
     rclpy.spin(bunsen)  # Start executing the node
     rclpy.shutdown()
+
+    print("Program finished")
